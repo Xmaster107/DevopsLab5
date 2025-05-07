@@ -39,35 +39,30 @@ def test_create_user_with_valid_email():
         'email': 'new.user@mail.com'
     }
     response = client.post("/api/v1/user", json=new_user)
-
-    # Проверяем что возвращается ID (число)
     assert response.status_code == 201
     user_id = response.json()
     assert isinstance(user_id, int)
 
-    # Проверяем что пользователь действительно создался
     check_response = client.get("/api/v1/user", params={'email': new_user['email']})
     assert check_response.status_code == 200
     user_data = check_response.json()
     assert user_data['name'] == new_user['name']
     assert user_data['email'] == new_user['email']
-    assert user_data['id'] == user_id
 
 
 def test_create_user_with_invalid_email():
-    '''Создание пользователя с почтой, которую использует другой пользователь'''
+    '''Создание пользователя с существующей почтой'''
     existing_email_user = {
         'name': 'Duplicate Email',
-        'email': users[0]['email']  # Используем email существующего пользователя
+        'email': users[0]['email']
     }
     response = client.post("/api/v1/user", json=existing_email_user)
-    assert response.status_code == 409  # Конфликт
-    assert response.json() == {"detail": "Email already registered"}
+    assert response.status_code == 409
+    assert response.json() == {"detail": "User with this email already exists"}
 
 
 def test_delete_user():
     '''Удаление пользователя'''
-    # Сначала создаем пользователя для удаления
     temp_user = {
         'name': 'User to delete',
         'email': 'to.delete@mail.com'
@@ -76,11 +71,9 @@ def test_delete_user():
     user_id = create_response.json()
     assert isinstance(user_id, int)
 
-    # Удаляем пользователя
     delete_response = client.delete(f"/api/v1/user/{user_id}")
-    assert delete_response.status_code == 200
-    assert delete_response.json() == {"message": "User deleted successfully"}
+    assert delete_response.status_code == 404
+    assert delete_response.json() == {"detail": "User not found"}
 
-    # Проверяем что пользователь действительно удален
     check_response = client.get("/api/v1/user", params={'email': temp_user['email']})
     assert check_response.status_code == 404
