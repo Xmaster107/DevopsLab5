@@ -8,6 +8,7 @@ test:
   before_script:
     - python -m pip install --upgrade pip
     - pip install pytest httpx
+    - pip install fastapi pytest httpx
   script:
     - python -m pytest tests/
 
