@@ -2,13 +2,11 @@ FROM python:3.11
 
 WORKDIR /app
 
-COPY . .
+COPY src/ src/
+COPY tests/ tests/
+COPY setup.py .
 
-RUN pip install \
-    fastapi==0.109.1 \
-    uvicorn==0.27.0 \
-    pydantic-settings==2.2.1 \
-    httpx==0.27.0 \
-    pytest==8.0.0
+RUN pip install -e .  # Установка в режиме разработки
+RUN pip install fastapi uvicorn httpx pytest
 
-CMDost", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000"]
