@@ -39,16 +39,19 @@ def test_create_user_with_valid_email():
         'email': 'new.user@mail.com'
     }
     response = client.post("/api/v1/user", json=new_user)
-    assert response.status_code == 201
-    response_data = response.json()
-    assert response_data['name'] == new_user['name']
-    assert response_data['email'] == new_user['email']
-    assert 'id' in response_data
 
-    # Проверяем, что пользователь действительно создался
+    # Проверяем что возвращается ID (число)
+    assert response.status_code == 201
+    user_id = response.json()
+    assert isinstance(user_id, int)
+
+    # Проверяем что пользователь действительно создался
     check_response = client.get("/api/v1/user", params={'email': new_user['email']})
     assert check_response.status_code == 200
-    assert check_response.json()['email'] == new_user['email']
+    user_data = check_response.json()
+    assert user_data['name'] == new_user['name']
+    assert user_data['email'] == new_user['email']
+    assert user_data['id'] == user_id
 
 
 def test_create_user_with_invalid_email():
@@ -58,25 +61,26 @@ def test_create_user_with_invalid_email():
         'email': users[0]['email']  # Используем email существующего пользователя
     }
     response = client.post("/api/v1/user", json=existing_email_user)
-    assert response.status_code == 400
+    assert response.status_code == 409  # Конфликт
     assert response.json() == {"detail": "Email already registered"}
 
 
 def test_delete_user():
     '''Удаление пользователя'''
-    # Сначала создадим пользователя для удаления
+    # Сначала создаем пользователя для удаления
     temp_user = {
         'name': 'User to delete',
         'email': 'to.delete@mail.com'
     }
     create_response = client.post("/api/v1/user", json=temp_user)
-    user_id = create_response.json()['id']
+    user_id = create_response.json()
+    assert isinstance(user_id, int)
 
     # Удаляем пользователя
     delete_response = client.delete(f"/api/v1/user/{user_id}")
     assert delete_response.status_code == 200
     assert delete_response.json() == {"message": "User deleted successfully"}
 
-    # Проверяем, что пользователь действительно удален
+    # Проверяем что пользователь действительно удален
     check_response = client.get("/api/v1/user", params={'email': temp_user['email']})
     assert check_response.status_code == 404
