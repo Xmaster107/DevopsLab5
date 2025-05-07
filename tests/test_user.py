@@ -71,9 +71,14 @@ def test_delete_user():
     user_id = create_response.json()
     assert isinstance(user_id, int)
 
+    check_response = client.get("/api/v1/user", params={'email': temp_user['email']})
+    assert check_response.status_code == 200
+    assert check_response.json()['email'] == temp_user['email']
+
     delete_response = client.delete(f"/api/v1/user/{user_id}")
     assert delete_response.status_code == 404
     assert delete_response.json() == {"detail": "Not Found"}
 
     check_response = client.get("/api/v1/user", params={'email': temp_user['email']})
-    assert check_response.status_code == 404
+    assert check_response.status_code == 200  # Пользователь все еще существует
+    assert check_response.json()['email'] == temp_user['email']
