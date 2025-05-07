@@ -7,7 +7,8 @@ test:
   image: python:3.12
   before_script:
     - python -m pip install --upgrade pip
-    - pip install fastapi uvicorn pytest httpx requests sqlalchemy python-multipart  # Все основные зависимости
+      - pip install .  # Установит все зависимости из setup.py
+      - pip install pytest httpx  # Доп. зависимости для тестов
   script:
     - python -m pytest tests/ -v  # Запуск тестов с подробным выводом
 
