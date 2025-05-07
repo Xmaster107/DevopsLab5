@@ -1,0 +1,27 @@
+stages:
+  - test
+  - build
+
+test:
+  stage: test
+  image: python:3.12
+  before_script:
+    - python -m pip install --upgrade pip
+    - pip install pytest httpx
+  script:
+    - python -m pytest tests/
+
+build:
+  stage: build
+  image: docker:latest
+  services:
+    - docker:dind
+  variables:
+    DOCKER_TLS_CERTDIR: "/certs"
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+      when: on_success
+  script:
+    - echo "$DOCKERHUB_TOKEN" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
+    - docker build -t $DOCKERHUB_USERNAME/my-app:latest .
+    - docker push $DOCKERHUB_USERNAME/my-app:latest
