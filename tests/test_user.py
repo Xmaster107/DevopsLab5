@@ -73,7 +73,7 @@ def test_delete_user():
 
     delete_response = client.delete(f"/api/v1/user/{user_id}")
     assert delete_response.status_code == 404
-    assert delete_response.json() == {"detail": "User not found"}
+    assert delete_response.json() == {"detail": "Not Found"}
 
     check_response = client.get("/api/v1/user", params={'email': temp_user['email']})
     assert check_response.status_code == 404
