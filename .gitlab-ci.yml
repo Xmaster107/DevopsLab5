@@ -7,10 +7,10 @@ test:
   image: python:3.12
   before_script:
     - python -m pip install --upgrade pip
-    - pip install pytest httpx
-    - pip install fastapi pytest httpx
+    - pip install fastapi uvicorn pytest httpx requests sqlalchemy python-multipart  # Все основные зависимости
+    - pip install -e .  # Если ваш проект нужно установить как пакет
   script:
-    - python -m pytest tests/
+    - python -m pytest tests/ -v  # Запуск тестов с подробным выводом
 
 build:
   stage: build
